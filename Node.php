@@ -43,6 +43,7 @@ class Node {
 	 */
 	public function __construct($intId) {
 		$this->intId = $intId;
+		$this->objParent = null;
 	}
 
 	/**
@@ -122,5 +123,13 @@ class Node {
 	 */
 	public function getRightValue() {
 		return $this->intRightValue;
+	}
+
+	/**
+	 * Return the parent node
+	 * @return \Node
+	 */
+	public function getParent() {
+		return $this->objParent;
 	}
 }
