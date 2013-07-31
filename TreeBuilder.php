@@ -2,7 +2,17 @@
 
 class TreeBuilder {
 
+	/**
+	 * All the nodes composing the internal graph
+	 * @var array array of node
+	 */
 	protected $arrayNodes;
+
+	/**
+	 * Root node of the internal graph
+	 * @var Node
+	 */
+	protected $objRootNode;
 
 	/**
 	 * Construct a new tree/graph
@@ -73,6 +83,34 @@ class TreeBuilder {
 	 */
 	protected function compute() {
 
+		if (!$this->findRoot()) {
+			return;
+		}
+		// FIFO : parcours en profondeur
+
+		$arrayNodesToTest = array($this->objRootNode);
+		while (!empty($arrayNodesToTest)) {
+
+		}
+	}
+
+	/**
+	 * Establish the root node (one of the node has no parent)
+	 * @return bool (true if ok, false if failure (no node specified))
+	 */
+	protected function findRoot() {
+		if (empty($this->arrayNodes)) {
+			return false;
+		}
+
+		$objTmpNode = current($this->arrayNodes);
+		$objTmpParentNode = $objTmpNode->getParent();
+		while ($objTmpParentNode !== null) {
+			$objTmpParentNode = $objTmpParentNode->getParent();
+		}
+		$this->objRootNode = $objTmpParentNode;
+
+		return true;
 	}
 
 	/**
