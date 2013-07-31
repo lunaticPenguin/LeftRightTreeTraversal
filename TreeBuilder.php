@@ -86,16 +86,31 @@ class TreeBuilder {
 		if (!$this->findRoot()) {
 			return;
 		}
-		// FIFO : parcours en profondeur
 
-		$arrayNodesToTest = array($this->objRootNode);
-		while (!empty($arrayNodesToTest)) {
+		$objCurrentNode = $this->objRootNode;
+		$intCount = 0;
+		$this->_computeRecursivePart($objCurrentNode, $intCount);
+	}
 
+	protected function _computeRecursivePart(Node $objCurrentNode, &$intCount) {
+
+		$objCurrentNode->setLeftValue($intCount);
+		++$intCount;
+		if ($objCurrentNode->isLeaf()) {
+			$objCurrentNode->setRightValue($intCount);
+			++$intCount;
+			return;
 		}
+		$arrayChildren = $objCurrentNode->getChildren();
+		foreach ($arrayChildren as $objChildNode) {
+			++$intCount;
+			$this->_computeRecursivePart($objChildNode, $intCount);
+		}
+		$objCurrentNode->setRightValue(++$intCount);
 	}
 
 	/**
-	 * Establish the root node (one of the node has no parent)
+	 * Establish which node is the root node (one of the node has no parent)
 	 * @return bool (true if ok, false if failure (no node specified))
 	 */
 	protected function findRoot() {
