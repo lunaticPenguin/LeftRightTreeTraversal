@@ -33,7 +33,7 @@ class Node {
 	/**
 	 * Children's nodes
 	 *
-	 * @var Node's array
+	 * @var array of nodes
 	 */
 	protected $arrayChildrenNodes;
 
@@ -97,7 +97,7 @@ class Node {
 	 * Set the left value of the current node
 	 * @param int $intLeftValue
 	 */
-	public function setIntLeftValue($intLeftValue) {
+	public function setLeftValue($intLeftValue) {
 		$this->intLeftValue = $intLeftValue;
 	}
 
@@ -131,5 +131,21 @@ class Node {
 	 */
 	public function getParent() {
 		return $this->objParent;
+	}
+
+	/**
+	 * Allow to know if a node is a leaf (<=> has no children)
+	 * @return bool
+	 */
+	public function isLeaf() {
+		return empty($this->arrayChildrenNodes);
+	}
+
+	/**
+	 * Return all the children of a node
+	 * @return array
+	 */
+	public function getChildren() {
+		return $this->arrayChildrenNodes;
 	}
 }
