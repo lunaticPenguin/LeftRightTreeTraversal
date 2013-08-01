@@ -23,10 +23,24 @@ class TreeBuilder {
 	 */
 	protected $boolForcedPostCheckProcess;
 
+    /**
+     * @var array
+     */
+    protected $hashConfig;
+
 	/**
 	 * Construct a new tree/graph
 	 */
-	public function __construct() {
+	public function __construct(array $hashConfig = array()) {
+
+        $hashConfigDefaultValues = array(
+            'key_left'      => 'left',
+            'key_right'     => 'right',
+            'key_id'        => 'id',
+            'key_parent'    => 'parent'
+        );
+        $this->hashConfig = array_merge($hashConfigDefaultValues, $hashConfig);
+
 		$this->arrayNodes = array();
 		$this->boolForcedPostCheckProcess = false;
 	}
@@ -114,9 +128,9 @@ class TreeBuilder {
 		$arrayResult = array();
 		foreach ($this->arrayNodes as $objNode) {
 			$arrayResult[] = array(
-				'id'	=> $objNode->getId(),
-				'left'	=> $objNode->getLeftValue(),
-				'right'	=> $objNode->getRightValue()
+                $this->hashConfig['key_id']     => $objNode->getId(),
+                $this->hashConfig['key_left']   => $objNode->getLeftValue(),
+                $this->hashConfig['key_right']  => $objNode->getRightValue()
 			);
 		}
 		return $arrayResult;
@@ -162,15 +176,16 @@ class TreeBuilder {
 	public function setRawData(array $arrayData, $boolCheckRelations = true) {
 		$boolHasRootNode = false;
 		foreach ($arrayData as $hashNodeData) {
-			if (!array_key_exists('id', $hashNodeData) || !array_key_exists('parent', $hashNodeData)) {
+			if (!array_key_exists($this->hashConfig['key_id'], $hashNodeData)
+                || !array_key_exists($this->hashConfig['key_parent'], $hashNodeData)) {
 				exit('malformed input raw data');
 			}
 
-			$boolHasRootNode = !$boolHasRootNode ? is_null($hashNodeData['parent']) : true;
+			$boolHasRootNode = !$boolHasRootNode ? is_null($hashNodeData[$this->hashConfig['key_parent']]) : true;
 
-			$this->addNode(new Node($hashNodeData['id']));
-			if (!$boolCheckRelations && $hashNodeData['parent'] !== null) {
-				$this->setParentById($hashNodeData['parent'], $hashNodeData['id']);
+			$this->addNode(new Node($hashNodeData[$this->hashConfig['key_id']]));
+			if (!$boolCheckRelations && $hashNodeData[$this->hashConfig['key_parent']] !== null) {
+				$this->setParentById($hashNodeData[$this->hashConfig['key_parent']], $hashNodeData[$this->hashConfig['key_id']]);
 			}
 		}
 
@@ -180,7 +195,7 @@ class TreeBuilder {
 
 		if ($boolCheckRelations || $this->boolForcedPostCheckProcess) {
 			foreach ($arrayData as $hashNodeData) {
-				$this->setParentById($hashNodeData['parent'], $hashNodeData['id']);
+				$this->setParentById($hashNodeData[$this->hashConfig['key_parent']], $hashNodeData[$this->hashConfig['key_id']]);
 			}
 		}
 	}
