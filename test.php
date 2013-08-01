@@ -1,7 +1,11 @@
 <?php
 
-include 'Node.php';
-include 'TreeBuilder.php';
+// temp includes
+include 'LeftRightTreeTraversal/Node.php';
+include 'LeftRightTreeTraversal/TreeBuilder.php';
+
+use \LeftRightTreeTraversal\Node;
+use \LeftRightTreeTraversal\TreeBuilder;
 
 // here is a list of relations
 $arrayList = array(
