@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Class Node
+ * This class define a node which is a vertex in a non-oriented graph.
+ * 
+ * @author Corentin Legros
+ */
 class Node {
 
 	/**
@@ -53,8 +59,10 @@ class Node {
 	 * @param Node $objChildNode
 	 */
 	public function addChild(Node $objChildNode) {
-		$objChildNode->setParentNode($this);
 		$this->arrayChildrenNodes[$objChildNode->getId()] = $objChildNode;
+		if ($objChildNode->getParent() !== $this) {
+			$objChildNode->setParentNode($this);
+		}
 	}
 
 	/**
@@ -77,8 +85,10 @@ class Node {
 	public function setParentNode(Node $objParent) {
 		if ($this->objParent !== null) {
 			$this->objParent->removeChild($this);
+			$this->objParent = null;
 		}
 		$this->objParent = $objParent;
+		$objParent->addChild($this);
 	}
 
 	/*
