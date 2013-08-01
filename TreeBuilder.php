@@ -16,10 +16,17 @@ class TreeBuilder {
 	protected $arrayNodes;
 
 	/**
+	 * Allow to force the data check if using the setRawData method
+	 * @var bool
+	 */
+	protected $boolForcedPostCheckProcess;
+
+	/**
 	 * Construct a new tree/graph
 	 */
 	public function __construct() {
 		$this->arrayNodes = array();
+		$this->boolForcedPostCheckProcess = false;
 	}
 
 	/**
@@ -62,6 +69,8 @@ class TreeBuilder {
 	public function setChildById($intNodeIdA, $intNodeIdB) {
 		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
 			$this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
+		} else {
+			$this->boolForcedPostCheckProcess = true;
 		}
 	}
 
@@ -76,7 +85,7 @@ class TreeBuilder {
 		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
 			$this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
 		} else {
-			exit('inexisting id : ' . $intNodeIdA . ' et ' . $intNodeIdB);
+			$this->boolForcedPostCheckProcess = true;
 		}
 	}
 
@@ -112,6 +121,8 @@ class TreeBuilder {
 	}
 
 	/**
+	 * Compute the graph thanks to a recursive behaviour
+	 *
 	 * @param Node $objCurrentNode
 	 * @param $intCount
 	 */
@@ -130,5 +141,45 @@ class TreeBuilder {
 		}
 		$objCurrentNode->setRightValue($intCount);
 		++$intCount;
+	}
+
+	/**
+	 * Allow users to build the graph by directly passing an array
+	 * which defines all relations parent/child
+	 * The data format MUST be the following :
+	 * ARRAY(ARRAY('id' => #INTEGER, 'parent' => (#INTEGER|null))
+	 *
+	 * /!\ No cyclic graphs supported.
+	 * If there isn't any root node the process will be aborted.
+	 *
+	 * @param array $arrayData raw data with specified structure format
+	 * @param bool $boolCheckRelations if nodes's relations have to be checked by a post-process.\
+	 *    	Set to false improve the process, but be sure to provide data rightly sorted.\
+	 * 		Otherwise the check is forced.
+	 */
+	public function setRawData(array $arrayData, $boolCheckRelations = true) {
+		$boolHasRootNode = false;
+		foreach ($arrayData as $hashNodeData) {
+			if (!array_key_exists('id', $hashNodeData) || !array_key_exists('parent', $hashNodeData)) {
+				exit('malformed input raw data');
+			}
+
+			$boolHasRootNode = !$boolHasRootNode ? is_null($hashNodeData['parent']) : true;
+
+			$this->addNode(new Node($hashNodeData['id']));
+			if (!$boolCheckRelations && $hashNodeData['parent'] !== null) {
+				$this->setParentById($hashNodeData['parent'], $hashNodeData['id']);
+			}
+		}
+
+		if (!$boolHasRootNode) {
+			exit('no root node found');
+		}
+
+		if ($boolCheckRelations || $this->boolForcedPostCheckProcess) {
+			foreach ($arrayData as $hashNodeData) {
+				$this->setParentById($hashNodeData['parent'], $hashNodeData['id']);
+			}
+		}
 	}
 }
