@@ -33,7 +33,8 @@ class Node {
 	protected $intRightValue;
 
 	/**
-	 *
+     * Parent's node of the current node
+     *
 	 * @var Node
 	 */
 	protected $objParent;
