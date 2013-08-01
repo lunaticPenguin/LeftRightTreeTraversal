@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Class Node
+ * This class define a node which is a vertex in a non-oriented graph.
+ * 
+ * @author Corentin Legros
+ */
 class Node {
 
 	/**
@@ -33,7 +39,7 @@ class Node {
 	/**
 	 * Children's nodes
 	 *
-	 * @var Node's array
+	 * @var array of nodes
 	 */
 	protected $arrayChildrenNodes;
 
@@ -43,6 +49,7 @@ class Node {
 	 */
 	public function __construct($intId) {
 		$this->intId = $intId;
+		$this->objParent = null;
 	}
 
 	/**
@@ -52,8 +59,10 @@ class Node {
 	 * @param Node $objChildNode
 	 */
 	public function addChild(Node $objChildNode) {
-		$objChildNode->setParentNode($this);
 		$this->arrayChildrenNodes[$objChildNode->getId()] = $objChildNode;
+		if ($objChildNode->getParent() !== $this) {
+			$objChildNode->setParentNode($this);
+		}
 	}
 
 	/**
@@ -76,8 +85,10 @@ class Node {
 	public function setParentNode(Node $objParent) {
 		if ($this->objParent !== null) {
 			$this->objParent->removeChild($this);
+			$this->objParent = null;
 		}
 		$this->objParent = $objParent;
+		$objParent->addChild($this);
 	}
 
 	/*
@@ -96,7 +107,7 @@ class Node {
 	 * Set the left value of the current node
 	 * @param int $intLeftValue
 	 */
-	public function setIntLeftValue($intLeftValue) {
+	public function setLeftValue($intLeftValue) {
 		$this->intLeftValue = $intLeftValue;
 	}
 
@@ -122,5 +133,29 @@ class Node {
 	 */
 	public function getRightValue() {
 		return $this->intRightValue;
+	}
+
+	/**
+	 * Return the parent node
+	 * @return \Node
+	 */
+	public function getParent() {
+		return $this->objParent;
+	}
+
+	/**
+	 * Allow to know if a node is a leaf (<=> has no children)
+	 * @return bool
+	 */
+	public function isLeaf() {
+		return empty($this->arrayChildrenNodes);
+	}
+
+	/**
+	 * Return all the children of a node
+	 * @return array
+	 */
+	public function getChildren() {
+		return $this->arrayChildrenNodes;
 	}
 }
