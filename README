@@ -1,0 +1,7 @@
+The goal of this small library is to build a tree with left and right values on each vertex/node from a list having hierachical relations.
+
+My personal application of this library is the selection of a complete hierarchy with only few queries to database. Perhaps is there others applications, and I hope you'll find it useful. :)
+
+Feel free to fork this project or suggest improvement ideas. All criticisms are obviously welcomed.
+
+Sorry in advance for my english.

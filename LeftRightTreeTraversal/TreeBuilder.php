@@ -24,7 +24,11 @@ class TreeBuilder {
 	protected $boolForcedPostCheckProcess;
 
     /**
+     * Hash of used config. The content can be overridden but keep in mind that
+     * some checks are processed in order to keep a consistent process.
+     *
      * @var array
+     * @see TreeBuilder::__construct()
      */
     protected $hashConfig;
 
