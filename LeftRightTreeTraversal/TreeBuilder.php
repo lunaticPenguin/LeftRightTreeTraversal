@@ -1,5 +1,7 @@
 <?php
 
+namespace LeftRightTreeTraversal;
+
 /**
  * Class TreeBuilder
  * This class define the left-right tree builder
