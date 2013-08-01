@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Class TreeBuilder
+ * This class define the left-right tree builder
+ * which is responsible for building the graph with correct left-right values
+ *
+ * @author Corentin Legros
+ */
 class TreeBuilder {
 
 	/**
@@ -7,12 +14,6 @@ class TreeBuilder {
 	 * @var array array of node
 	 */
 	protected $arrayNodes;
-
-	/**
-	 * Root node of the internal graph
-	 * @var Node
-	 */
-	protected $objRootNode;
 
 	/**
 	 * Construct a new tree/graph
@@ -74,24 +75,46 @@ class TreeBuilder {
 	public function setParentById($intNodeIdA, $intNodeIdB) {
 		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
 			$this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
+		} else {
+			exit('inexisting id : ' . $intNodeIdA . ' et ' . $intNodeIdB);
 		}
 	}
 
 	/**
 	 * Compute the left and right value of for each node which belongs
 	 * to internal graph
+	 *
+	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
 	 */
-	protected function compute() {
+	public function export() {
 
-		if (!$this->findRoot()) {
-			return;
+		if (empty($this->arrayNodes)) {
+			return array();
 		}
 
-		$objCurrentNode = $this->objRootNode;
+		$objRootNode = current($this->arrayNodes);
+		while ($objRootNode->getParent() !== null) {
+			$objRootNode = $objRootNode->getParent();
+		}
+
 		$intCount = 0;
-		$this->_computeRecursivePart($objCurrentNode, $intCount);
+		$this->_computeRecursivePart($objRootNode, $intCount);
+
+		$arrayResult = array();
+		foreach ($this->arrayNodes as $objNode) {
+			$arrayResult[] = array(
+				'id'	=> $objNode->getId(),
+				'left'	=> $objNode->getLeftValue(),
+				'right'	=> $objNode->getRightValue()
+			);
+		}
+		return $arrayResult;
 	}
 
+	/**
+	 * @param Node $objCurrentNode
+	 * @param $intCount
+	 */
 	protected function _computeRecursivePart(Node $objCurrentNode, &$intCount) {
 
 		$objCurrentNode->setLeftValue($intCount);
@@ -103,48 +126,9 @@ class TreeBuilder {
 		}
 		$arrayChildren = $objCurrentNode->getChildren();
 		foreach ($arrayChildren as $objChildNode) {
-			++$intCount;
 			$this->_computeRecursivePart($objChildNode, $intCount);
 		}
-		$objCurrentNode->setRightValue(++$intCount);
-	}
-
-	/**
-	 * Establish which node is the root node (one of the node has no parent)
-	 * @return bool (true if ok, false if failure (no node specified))
-	 */
-	protected function findRoot() {
-		if (empty($this->arrayNodes)) {
-			return false;
-		}
-
-		$objTmpNode = current($this->arrayNodes);
-		$objTmpParentNode = $objTmpNode->getParent();
-		while ($objTmpParentNode !== null) {
-			$objTmpParentNode = $objTmpParentNode->getParent();
-		}
-		$this->objRootNode = $objTmpParentNode;
-
-		return true;
-	}
-
-	/**
-	 * Export internal graph to an array with adequate values
-	 * (it depends of the execution context)
-	 *
-	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
-	 */
-	public function export() {
-
-		$this->compute();
-		$arrayResult = array();
-		foreach ($this->arrayNodes as $objNode) {
-			$arrayResult[] = array(
-				'id'	=> $objNode->getId(),
-				'left'	=> $objNode->getLeftValue(),
-				'right'	=> $objNode->getRightValue()
-			);
-		}
-		return $arrayResult;
+		$objCurrentNode->setRightValue($intCount);
+		++$intCount;
 	}
 }
