@@ -39,8 +39,20 @@ class TreeBuilder {
             'key_id'        => 'id',
             'key_parent'    => 'parent'
         );
-        $this->hashConfig = array_merge($hashConfigDefaultValues, $hashConfig);
 
+        $this->hashConfig = array_merge($hashConfigDefaultValues, $hashConfig);
+        $arrayAvailableConfig = array_keys($hashConfigDefaultValues);
+        foreach ($arrayAvailableConfig as $strKey1Name) {
+            foreach ($arrayAvailableConfig as $strKey2Name) {
+                if ($strKey1Name !== $strKey2Name) {
+                    if ($this->hashConfig[$strKey1Name] === $this->hashConfig[$strKey2Name]) {
+                        $this->hashConfig[$strKey1Name] = $hashConfigDefaultValues[$strKey1Name];
+                        $this->hashConfig[$strKey2Name] = $hashConfigDefaultValues[$strKey2Name];
+                    }
+                }
+            }
+        }
+        
 		$this->arrayNodes = array();
 		$this->boolForcedPostCheckProcess = false;
 	}
