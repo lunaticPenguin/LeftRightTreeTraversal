@@ -13,7 +13,7 @@ class TreeBuilder {
 
 	/**
 	 * All the nodes composing the internal graph
-	 * @var array array of node
+	 * @var array of node
 	 */
 	protected $arrayNodes;
 
@@ -213,6 +213,71 @@ class TreeBuilder {
 			foreach ($arrayData as $hashNodeData) {
 				$this->setParentById($hashNodeData[$this->hashConfig['key_parent']], $hashNodeData[$this->hashConfig['key_id']]);
 			}
+		}
+	}
+	
+	/**
+	 * Allow to found a node by it's left value
+	 * 
+	 * @param integer $intLeftValue
+	 * @return Node|NULL
+	 */
+	public function getNodeWithLeftValue($intLeftValue) {
+		return $this->_getNodeWithValue($intLeftValue, null);
+	}
+	
+	/**
+	 * Allow to found a node by it's right value
+	 *
+	 * @param integer $intRightValue
+	 * @return Node|NULL
+	 */
+	public function getNodeWithRightValue($intRightValue) {
+		return $this->_getNodeWithValue(null, $intRightValue);
+	}
+	
+	/**
+	 * Allow to found a node by it's left and right values
+	 *
+	 * @param integer $intLeftValue
+	 * @param integer $intRightValue
+	 * 
+	 * @return Node|NULL
+	 */
+	public function getNodeWithLeftAndRightValues($intLeftValue, $intRightValue) {
+		return $this->_getNodeWithValue($intLeftValue, $intRightValue);
+	}
+	
+	/**
+	 * Allow to retrieve a specific node with left and/or right value(s)
+	 * 
+	 * @param integer|null $intLeftValue
+	 * @param integer|null $intRightValue
+	 * 
+	 * @return Node|NULL if not found
+	 */
+	protected function _getNodeWithValue($intLeftValue, $intRightValue) {
+		
+		if ($intLeftValue !== null && $intRightValue === null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getLeftValue() === $intLeftValue) {
+					return $objNode;
+				}
+			}
+		} else if ($intLeftValue === null && $intRightValue !== null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getRightValue() === $intRightValue) {
+					return $objNode;
+				}
+			}
+		} else if ($intLeftValue !== null && $intRightValue !== null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getLeftValue() === $intLeftValue && $objNode->getRightValue() === $intRightValue) {
+					return $objNode;
+				}
+			}
+		} else {
+			return null;
 		}
 	}
 }

@@ -54,3 +54,15 @@ $arrayList = array(
 $objBuilder = new TreeBuilder();
 $objBuilder->setRawData($arrayList);
 var_dump($objBuilder->export());
+
+// attempt to retrieve the node with the left value set to 5
+var_dump($objBuilder->getNodeWithLeftValue(5)->getId());
+
+// attempt to retrieve the node with the right value set to 7
+var_dump($objBuilder->getNodeWithRightValue(7)->getId());
+
+// attempt to retrieve the node with left value set to 0 and right value set to 19
+var_dump($objBuilder->getNodeWithLeftAndRightValues(0, 19)->getId());
+
+// attempt to retrieve an inexisting node
+var_dump($objBuilder->getNodeWithLeftValue(-1));
