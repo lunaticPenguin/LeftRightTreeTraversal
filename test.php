@@ -66,3 +66,6 @@ var_dump($objBuilder->getNodeWithLeftAndRightValues(0, 19)->getId());
 
 // attempt to retrieve an inexisting node
 var_dump($objBuilder->getNodeWithLeftValue(-1));
+
+// attempt to retrieve the root node
+var_dump($objBuilder->getRootNode()->getId());

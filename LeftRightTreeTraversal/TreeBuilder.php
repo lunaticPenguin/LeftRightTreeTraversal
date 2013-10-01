@@ -280,4 +280,18 @@ class TreeBuilder {
 			return null;
 		}
 	}
+	
+	/**
+	 * Allow to retrieve the root node
+	 * 
+	 * @return Node|NULL
+	 */
+	public function getRootNode() {
+		foreach ($this->arrayNodes as $objNode) {
+			if ($objNode->getParent() === null) {
+				return $objNode;
+			}
+		}
+		return null;
+	}
 }
