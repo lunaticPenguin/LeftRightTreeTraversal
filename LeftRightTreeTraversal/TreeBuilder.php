@@ -194,7 +194,11 @@ class TreeBuilder {
 		foreach ($arrayData as $hashNodeData) {
 			if (!array_key_exists($this->hashConfig['key_id'], $hashNodeData)
                 || !array_key_exists($this->hashConfig['key_parent'], $hashNodeData)) {
-				exit('malformed input raw data');
+				throw new \InvalidArgumentException(
+					sprintf('Malformed input raw data ([%s] and [%s] keys required).',
+						$this->hashConfig['key_id'],
+						$this->hashConfig['key_parent'])
+				);
 			}
 
 			$boolHasRootNode = !$boolHasRootNode ? is_null($hashNodeData[$this->hashConfig['key_parent']]) : true;
@@ -206,7 +210,7 @@ class TreeBuilder {
 		}
 
 		if (!$boolHasRootNode) {
-			exit('no root node found');
+			throw new \InvalidArgumentException('Root node cannot be found.');
 		}
 
 		if ($boolCheckRelations || $this->boolForcedPostCheckProcess) {
