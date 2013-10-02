@@ -99,7 +99,7 @@ class TreeBuilder {
 	 * @param int $intNodeIdB id of node B
 	 */
 	public function setChildById($intNodeIdA, $intNodeIdB) {
-		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
+		if (array_key_exists($intNodeIdA, $this->arrayNodes) && array_key_exists($intNodeIdB, $this->arrayNodes)) {
 			$this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
 		} else {
 			$this->boolForcedPostCheckProcess = true;
@@ -114,7 +114,7 @@ class TreeBuilder {
 	 * @param int $intNodeIdB id of node B
 	 */
 	public function setParentById($intNodeIdA, $intNodeIdB) {
-		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
+		if (array_key_exists($intNodeIdA, $this->arrayNodes) && array_key_exists($intNodeIdB, $this->arrayNodes)) {
 			$this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
 		} else {
 			$this->boolForcedPostCheckProcess = true;
