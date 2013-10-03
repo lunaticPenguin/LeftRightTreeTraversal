@@ -197,7 +197,8 @@ class TreeBuilder {
 				throw new \InvalidArgumentException(
 					sprintf('Malformed input raw data ([%s] and [%s] keys required).',
 						$this->hashConfig['key_id'],
-						$this->hashConfig['key_parent'])
+						$this->hashConfig['key_parent']),
+					100
 				);
 			}
 
@@ -210,7 +211,7 @@ class TreeBuilder {
 		}
 
 		if (!$boolHasRootNode) {
-			throw new \InvalidArgumentException('Root node cannot be found.');
+			throw new \InvalidArgumentException('Root node cannot be found.', 110);
 		}
 
 		if ($boolCheckRelations || $this->boolForcedPostCheckProcess) {

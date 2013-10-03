@@ -12,20 +12,65 @@ use LeftRightTreeTraversal\Node;
 
 class TreeBuilder extends atoum\test {
 	
+	/**
+	 * Tests on __construct() method
+	 */
 	public function test__construct() {
+		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
-
 		$this
 			->object($objBuilder)
 			->isNotNull($objBuilder)
 			->isInstanceOf('LeftRightTreeTraversal\TreeBuilder')
 		;
-
+		
+		/*
+		 * Same test, with a custom config
+		 */
 		$hashConfig = array(
 			'key_left' 		=>	'custom_left',
 			'key_right'		=>	'custom_right',
 			'key_id'		=>	'custom_id',
 			'key_parent'	=>	'custom_parent'
+		);
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder($hashConfig);
+		
+		$this
+			->object($objBuilder)
+			->isNotNull($objBuilder)
+			->isInstanceOf('LeftRightTreeTraversal\TreeBuilder')
+		;
+	}
+	
+	/**
+	 * Tests on addNode() method
+	 */
+	public function testAddNode() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		$arrayResult = $objBuilder->export();
+		
+		$this
+			->array($arrayResult)
+				->hasKey(0)
+				->size->isEqualTo(1)
+			->array($arrayResult[0])
+				->hasKey('id')
+				->hasKey('left')
+				->hasKey('right')
+		;
+		
+		/*
+		 * Same test with a custom config
+		 */
+		
+		$hashConfig = array(
+				'key_left' 		=>	'custom_left',
+				'key_right'		=>	'custom_right',
+				'key_id'		=>	'custom_id',
+				'key_parent'	=>	'custom_parent'
 		);
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder($hashConfig);
 		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
@@ -38,15 +83,25 @@ class TreeBuilder extends atoum\test {
 			->isInstanceOf('LeftRightTreeTraversal\TreeBuilder')
 			
 			->array($arrayResult)
-			->hasKey(0)
-			->size->isEqualTo(1)
+				->hasKey(0)
+				->size->isEqualTo(1)
 			->array($arrayResult[0])
-			->hasKey('custom_id')
-			->hasKey('custom_left')
-			->hasKey('custom_right')
+				->hasKey('custom_id')
+				->hasKey('custom_left')
+				->hasKey('custom_right')
+			->integer($arrayResult[0]['custom_id'])
+				->isEqualTo(0)
+			->integer($arrayResult[0]['custom_left'])
+				->isEqualTo(0)
+			->integer($arrayResult[0]['custom_right'])
+				->isEqualTo(1)
 		;
+		
 	}
 	
+	/**
+	 * Tests on export() method
+	 */
 	public function testExport() {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
@@ -57,9 +112,7 @@ class TreeBuilder extends atoum\test {
 			->array($arrayResult)
 			->hasKey(0)
 			->size->isEqualTo(1)
-		;
-		
-		$this
+			
 			->integer($arrayResult[0]['left'])
 			->isEqualTo(0)
 
@@ -71,6 +124,9 @@ class TreeBuilder extends atoum\test {
 		;
 	}
 	
+	/**
+	 * Tests on setRawData() method
+	 */
 	public function testSetRawData() {
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
 		$arrayData = array(
@@ -212,7 +268,9 @@ class TreeBuilder extends atoum\test {
 			;
 		}
 		
-		/* ***** */
+		/*
+		 * Check for setRawData() + addNode()
+		 **/
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
 		$objBuilder->setRawData($arrayData);
@@ -287,6 +345,153 @@ class TreeBuilder extends atoum\test {
 				'parent'=> 6,
 				'left'	=> 13,
 				'right'	=> 14
+			)
+		);
+		
+		$arrayResult = $objBuilder->export();
+		
+		$this
+			->array($arrayResult)
+			->hasKey(0)
+			->hasKey(1)
+			->hasKey(2)
+			->hasKey(3)
+			->hasKey(4)
+			->hasKey(5)
+			->hasKey(6)
+			->hasKey(7)
+			->hasKey(8)
+			->hasKey(9)
+			->hasKey(10)
+			->size->isEqualTo(11)
+		;
+		
+		foreach ($arrayResult as $hashNode) {
+			$this
+				->array($hashNode)
+					->hasKey('id')
+					->hasKey('left')
+					->hasKey('right')
+				->integer($hashNode['id'])
+					->isEqualTo($hashChecks[$hashNode['id']]['id'])
+				->integer($hashNode['left'])
+					->isEqualTo($hashChecks[$hashNode['id']]['left'])
+				->integer($hashNode['right'])
+					->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
+		
+		/* **** */
+
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$arrayWrongData1 = array(
+			array(
+				'id' 		=> 1,
+				'parent'	=> null
+			),
+			array(
+				'id' 		=> 2,
+				'parent'	=> 1
+			),
+			array(
+				'parent'	=> 1
+			)
+		);
+		
+		$arrayWrongData2 = array(
+			array(
+				'id' 		=> 1,
+				'parent'	=> 3
+			),
+			array(
+				'id' 		=> 2,
+				'parent'	=> 1
+			),
+			array(
+				'id' 		=> 3,
+				'parent'	=> 1
+			)
+		);
+		
+		// check for malformed input data
+		$this
+			->exception(
+				function() use($objBuilder, $arrayWrongData1) {
+					$objBuilder->setRawData($arrayWrongData1);
+				}
+			)->hasCode(100);
+		
+		// check for no root node
+		$this
+			->exception(
+				function() use($objBuilder, $arrayWrongData2) {
+					$objBuilder->setRawData($arrayWrongData2);
+				}
+			)->hasCode(110);
+	}
+	
+	/**
+	 * Tests on setParentByNodes() method
+	 */
+	public function testSetParentByNodes() { //testSetParentByNodes() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$objBuilder->setParentByNodes($objNode1, $objNode2);
+		$hashChecks = array(
+			1 => array(
+				'id' 		=> 1,
+				'parent'	=> null,
+				'left'		=> 0,
+				'right'		=> 3
+			),
+			2 => array(
+				'id' 		=> 2,
+				'parent'	=> 1,
+				'left'		=> 1,
+				'right'		=> 2
+			)
+		);
+		
+		$arrayResult = $objBuilder->export();
+		foreach ($arrayResult as $hashNode) {
+			$this
+				->array($hashNode)
+					->hasKey('id')
+					->hasKey('left')
+					->hasKey('right')
+				->integer($hashNode['id'])
+					->isEqualTo($hashChecks[$hashNode['id']]['id'])
+				->integer($hashNode['left'])
+					->isEqualTo($hashChecks[$hashNode['id']]['left'])
+				->integer($hashNode['right'])
+					->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
+		
+		/*
+		 * Same tests, inverted
+		 */
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$objBuilder->setParentByNodes($objNode2, $objNode1);
+		$hashChecks = array(
+			1 => array(
+				'id' 		=> 1,
+				'parent'	=> 2,
+				'left'		=> 1,
+				'right'		=> 2
+			),
+			2 => array(
+				'id' 		=> 2,
+				'parent'	=> null,
+				'left'		=> 0,
+				'right'		=> 3
 			)
 		);
 		
