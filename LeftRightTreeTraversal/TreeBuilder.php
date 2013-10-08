@@ -77,6 +77,16 @@ class TreeBuilder {
 	 * @param Node $objNodeB
 	 */
 	public function setParentByNodes(Node $objNodeA, Node $objNodeB) {
+		
+		// two checks to verify if the nodes belongs to the builder
+		if (!$this->hasNode($objNodeA)) {
+			$this->addNode($objNodeA);
+		}
+		
+		if (!$this->hasNode($objNodeB)) {
+			$this->addNode($objNodeB);
+		}
+		
 		$objNodeB->setParentNode($objNodeA);
 	}
 
@@ -298,5 +308,21 @@ class TreeBuilder {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Allow to know if the builder already has a node
+	 * @param Node $objNode
+	 */
+	public function hasNode(Node $objNode) {
+		return $this->hasNodeWithId($objNode->getId());
+	}
+	
+	/**
+	 * Allow to know if the builder already has a node with a specific id
+	 * @param integer $intNodeId
+	 */
+	public function hasNodeWithId($intNodeId) {
+		return array_key_exists($intNodeId, $this->arrayNodes);
 	}
 }

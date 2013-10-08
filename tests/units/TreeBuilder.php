@@ -43,6 +43,30 @@ class TreeBuilder extends atoum\test {
 	}
 	
 	/**
+	 * Tests on hasNode() method
+	 */
+	public function testHasNode() {
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$objNode = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode);
+	
+		$this->boolean($objBuilder->hasNode($objNode))->isTrue();
+		$this->boolean($objBuilder->hasNode(new LeftRightTreeTraversal\Node(2)))->isFalse();
+	}
+	
+	/**
+	 * Tests on hasNodeWithId() method
+	 */
+	public function testHasNodeWithId() {
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$objNode = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode);
+		
+		$this->boolean($objBuilder->hasNodeWithId(1))->isTrue();
+		$this->boolean($objBuilder->hasNodeWithId(2))->isFalse();
+	}
+	
+	/**
 	 * Tests on addNode() method
 	 */
 	public function testAddNode() {
