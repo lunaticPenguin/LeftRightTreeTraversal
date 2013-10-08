@@ -433,7 +433,7 @@ class TreeBuilder extends atoum\test {
 	/**
 	 * Tests on setParentByNodes() method
 	 */
-	public function testSetParentByNodes() { //testSetParentByNodes() {
+	public function testSetParentByNodes() {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
 		$objNode1 = new LeftRightTreeTraversal\Node(1);
@@ -456,6 +456,7 @@ class TreeBuilder extends atoum\test {
 		);
 		
 		$arrayResult = $objBuilder->export();
+		$this->array($arrayResult)->size->isEqualTo(2);
 		foreach ($arrayResult as $hashNode) {
 			$this
 				->array($hashNode)
@@ -496,6 +497,7 @@ class TreeBuilder extends atoum\test {
 		);
 		
 		$arrayResult = $objBuilder->export();
+		$this->array($arrayResult)->size->isEqualTo(2);
 		foreach ($arrayResult as $hashNode) {
 			$this
 			->array($hashNode)
@@ -510,5 +512,33 @@ class TreeBuilder extends atoum\test {
 				->isEqualTo($hashChecks[$hashNode['id']]['right'])
 			;
 		}
+	}
+	
+	public function testSetParentByIds() {
+		
+	}
+	
+	public function testSetChildByNodes() {
+		
+	}
+	
+	public function testSetChildByIds() {
+		
+	}
+	
+	public function testGetRootNode() {
+		
+	}
+	
+	public function testGetNodeWithLeftAndRightValues() {
+		
+	}
+
+	public function testGetNodeWithLeftValue() {
+	
+	}
+	
+	public function testGetNodeWithRightValue() {
+		
 	}
 }
