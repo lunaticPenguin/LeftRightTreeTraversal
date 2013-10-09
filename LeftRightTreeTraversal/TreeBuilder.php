@@ -31,6 +31,18 @@ class TreeBuilder {
      * @see TreeBuilder::__construct()
      */
     protected $hashConfig;
+    
+    /**
+     * Order of the graph
+     * @var integer
+     */
+    protected $intOrder;
+    
+    /**
+     * Flag to know if export has been computed
+     * @var boolean
+     */
+    protected $boolIsComputed;
 
 	/**
 	 * Construct a new tree/graph
@@ -59,22 +71,32 @@ class TreeBuilder {
         
 		$this->arrayNodes = array();
 		$this->boolForcedPostCheckProcess = false;
+		$this->boolIsComputed = false;
+		$this->intOrder = 0;
 	}
 
 	/**
 	 * Add node to graph tree
 	 * @param Node $objNode
+	 * @return boolean
 	 */
 	public function addNode(Node $objNode) {
-		$this->arrayNodes[$objNode->getId()] = $objNode;
+		if (!$this->hasNode($objNode)) {
+			$this->arrayNodes[$objNode->getId()] = $objNode;
+			++$this->intOrder;
+			return true;
+		}
+		return false;
 	}
-
+	
 	/**
 	 * Set the node A parent of node B.
 	 * This method only delegates instructions to the Node class's methods.
 	 *
 	 * @param Node $objNodeA
 	 * @param Node $objNodeB
+	 * 
+	 * @return boolean
 	 */
 	public function setParentByNodes(Node $objNodeA, Node $objNodeB) {
 		
@@ -87,7 +109,7 @@ class TreeBuilder {
 			$this->addNode($objNodeB);
 		}
 		
-		$objNodeB->setParentNode($objNodeA);
+		return $objNodeB->setParentNode($objNodeA);
 	}
 
 	/**
@@ -96,9 +118,21 @@ class TreeBuilder {
 	 *
 	 * @param Node $objNodeA
 	 * @param Node $objNodeB
+	 * 
+	 * @return boolean
 	 */
 	public function setChildByNodes(Node $objNodeA, Node $objNodeB) {
-		$objNodeB->addChild($objNodeA);
+		
+		// two checks to verify if the nodes belongs to the builder
+		if (!$this->hasNode($objNodeA)) {
+			$this->addNode($objNodeA);
+		}
+		
+		if (!$this->hasNode($objNodeB)) {
+			$this->addNode($objNodeB);
+		}
+		
+		return $objNodeB->addChild($objNodeA);
 	}
 
 	/**
@@ -107,13 +141,19 @@ class TreeBuilder {
 	 *
 	 * @param int $intNodeIdA id of node A
 	 * @param int $intNodeIdB id of node B
+	 * 
+	 * @return boolean
 	 */
 	public function setChildById($intNodeIdA, $intNodeIdB) {
-		if (array_key_exists($intNodeIdA, $this->arrayNodes) && array_key_exists($intNodeIdB, $this->arrayNodes)) {
-			$this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
-		} else {
-			$this->boolForcedPostCheckProcess = true;
+		
+		if ($this->hasNodeWithId($intNodeIdA) && $this->hasNodeWithId($intNodeIdB)) {
+			
+			return $this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
 		}
+		
+		// force checks of relations if settlement is done using self::setRawData() method
+		$this->boolForcedPostCheckProcess = true;
+		return false;
 	}
 
 	/**
@@ -122,41 +162,61 @@ class TreeBuilder {
 	 *
 	 * @param int $intNodeIdA id of node A
 	 * @param int $intNodeIdB id of node B
+	 * 
+	 * @return boolean
 	 */
 	public function setParentById($intNodeIdA, $intNodeIdB) {
-		if (array_key_exists($intNodeIdA, $this->arrayNodes) && array_key_exists($intNodeIdB, $this->arrayNodes)) {
-			$this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
-		} else {
-			$this->boolForcedPostCheckProcess = true;
+		
+		if ($this->hasNodeWithId($intNodeIdA) && $this->hasNodeWithId($intNodeIdB)) {
+			return $this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
 		}
+		
+		// force checks of relations if settlemet is done using self::setRawData() method
+		$this->boolForcedPostCheckProcess = true;
+		return false;
 	}
 
 	/**
-	 * Compute the left and right value of for each node which belongs
-	 * to internal graph
-	 *
-	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
+	 * Compute the left and right value for each node which belongs
+	 * to internal graph.
+	 * 
+	 * @return \LeftRightTreeTraversal\TreeBuilder
 	 */
-	public function export() {
+	public function compute() {
 
 		if (empty($this->arrayNodes)) {
-			return array();
+			return $this;
 		}
 
-		$objRootNode = current($this->arrayNodes);
-		while ($objRootNode->getParent() !== null) {
-			$objRootNode = $objRootNode->getParent();
+		$objRootNode = $this->getRootNode();
+		if (is_null($objRootNode)) {
+			return $this;
 		}
 
 		$intCount = 0;
 		$this->_computeRecursivePart($objRootNode, $intCount);
-
+		$this->boolIsComputed = true;
+		return $this;
+	}
+	
+	/**
+	 * Export the whole computed graph as an array of arrays. If the graph hasn't been computed, an empty
+	 * array will be returned.
+	 * 
+	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
+	 */
+	public function export() {
+		
+		if (!$this->boolIsComputed) {
+			return array();
+		}
+		
 		$arrayResult = array();
 		foreach ($this->arrayNodes as $objNode) {
 			$arrayResult[] = array(
-                $this->hashConfig['key_id']     => $objNode->getId(),
-                $this->hashConfig['key_left']   => $objNode->getLeftValue(),
-                $this->hashConfig['key_right']  => $objNode->getRightValue()
+				$this->hashConfig['key_id']     => $objNode->getId(),
+				$this->hashConfig['key_left']   => $objNode->getLeftValue(),
+				$this->hashConfig['key_right']  => $objNode->getRightValue()
 			);
 		}
 		return $arrayResult;
@@ -324,5 +384,21 @@ class TreeBuilder {
 	 */
 	public function hasNodeWithId($intNodeId) {
 		return array_key_exists($intNodeId, $this->arrayNodes);
+	}
+	
+	/**
+	 * Allow to get the graph's order
+	 * @return integer
+	 */
+	public function getOrder() {
+		return $this->intOrder;
+	}
+	
+	/**
+	 * Allow to know if the process has been computed
+	 * @return boolean
+	 */
+	public function isComputed() {
+		return $this->boolIsComputed;
 	}
 }

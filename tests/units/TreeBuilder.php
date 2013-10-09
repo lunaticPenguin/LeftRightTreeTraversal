@@ -8,7 +8,6 @@ include_once '../../LeftRightTreeTraversal/Node.php';
 
 use mageekguy\atoum;
 use LeftRightTreeTraversal;
-use LeftRightTreeTraversal\Node;
 
 class TreeBuilder extends atoum\test {
 	
@@ -18,6 +17,7 @@ class TreeBuilder extends atoum\test {
 	public function test__construct() {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$this
 			->object($objBuilder)
 			->isNotNull($objBuilder)
@@ -46,7 +46,9 @@ class TreeBuilder extends atoum\test {
 	 * Tests on hasNode() method
 	 */
 	public function testHasNode() {
+		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objNode = new LeftRightTreeTraversal\Node(1);
 		$objBuilder->addNode($objNode);
 	
@@ -58,7 +60,9 @@ class TreeBuilder extends atoum\test {
 	 * Tests on hasNodeWithId() method
 	 */
 	public function testHasNodeWithId() {
+		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objNode = new LeftRightTreeTraversal\Node(1);
 		$objBuilder->addNode($objNode);
 		
@@ -73,8 +77,8 @@ class TreeBuilder extends atoum\test {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
 		
-		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
-		$arrayResult = $objBuilder->export();
+		$this->boolean($objBuilder->addNode(new LeftRightTreeTraversal\Node(0)))->isTrue();
+		$arrayResult = $objBuilder->compute()->export();
 		
 		$this
 			->array($arrayResult)
@@ -97,9 +101,9 @@ class TreeBuilder extends atoum\test {
 				'key_parent'	=>	'custom_parent'
 		);
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder($hashConfig);
-		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		$this->boolean($objBuilder->addNode(new LeftRightTreeTraversal\Node(0)))->isTrue();
 		
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		
 		$this
 			->object($objBuilder)
@@ -124,27 +128,100 @@ class TreeBuilder extends atoum\test {
 	}
 	
 	/**
+	 * Tests on getOrder() method
+	 */
+	public function testGetOrder() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode = new LeftRightTreeTraversal\Node(1);
+		
+		$this->integer($objBuilder->getOrder())->isEqualTo(0);
+		
+		$objBuilder->addNode($objNode);
+		$this->integer($objBuilder->getOrder())->isEqualTo(1);
+
+		$objBuilder->addNode($objNode);
+		$this->integer($objBuilder->getOrder())->isEqualTo(1);
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(2));
+		$this->integer($objBuilder->getOrder())->isEqualTo(2);
+	}
+	
+	/**
+	 * Tests on compute() method
+	 */
+	public function testCompute() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		
+		$this->array($objBuilder->export())->isEmpty();
+		
+		$objBuilder->compute();
+		$arrayResult = $objBuilder->export();
+		$this
+			->array($arrayResult)
+			->hasKey(0)
+			->size->isEqualTo(1)
+			->integer($arrayResult[0]['left'])
+			->isEqualTo(0)
+			
+			->integer($arrayResult[0]['right'])
+			->isEqualTo(1)
+			
+			->integer($arrayResult[0]['id'])
+			->isEqualTo(0);
+	}
+	
+	/**
+	 * Tests on isComputed() method
+	 */
+	public function testIsComputed() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		
+		
+		$this->boolean($objBuilder->isComputed())->isFalse();
+		$objBuilder->compute();
+		$this->boolean($objBuilder->isComputed())->isTrue();
+		
+		/* * */
+		
+
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$this->boolean($objBuilder->isComputed())->isFalse();
+		$objBuilder->compute();
+		$this->boolean($objBuilder->isComputed())->isFalse(); // an empty graph cannot be computed
+	}
+	
+	/**
 	 * Tests on export() method
 	 */
 	public function testExport() {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		
 		$this
-			->array($arrayResult)
-			->hasKey(0)
-			->size->isEqualTo(1)
+		->array($arrayResult)
+		->hasKey(0)
+		->size->isEqualTo(1)
 			
-			->integer($arrayResult[0]['left'])
-			->isEqualTo(0)
-
-			->integer($arrayResult[0]['right'])
-			->isEqualTo(1)
-
-			->integer($arrayResult[0]['id'])
-			->isEqualTo(0)
+		->integer($arrayResult[0]['left'])
+		->isEqualTo(0)
+		
+		->integer($arrayResult[0]['right'])
+		->isEqualTo(1)
+		
+		->integer($arrayResult[0]['id'])
+		->isEqualTo(0)
 		;
 	}
 	
@@ -152,7 +229,9 @@ class TreeBuilder extends atoum\test {
 	 * Tests on setRawData() method
 	 */
 	public function testSetRawData() {
+		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$arrayData = array(
 			array(
 				'id' => 2,
@@ -197,7 +276,7 @@ class TreeBuilder extends atoum\test {
 		);
 		$objBuilder->setRawData($arrayData);
 		
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		$this
 			->array($arrayResult)
 			->hasKey(0)
@@ -297,6 +376,7 @@ class TreeBuilder extends atoum\test {
 		 **/
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objBuilder->setRawData($arrayData);
 		
 		$objNode = new LeftRightTreeTraversal\Node(42);
@@ -372,7 +452,7 @@ class TreeBuilder extends atoum\test {
 			)
 		);
 		
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		
 		$this
 			->array($arrayResult)
@@ -408,6 +488,7 @@ class TreeBuilder extends atoum\test {
 		/* **** */
 
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$arrayWrongData1 = array(
 			array(
 				'id' 		=> 1,
@@ -460,10 +541,11 @@ class TreeBuilder extends atoum\test {
 	public function testSetParentByNodes() {
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objNode1 = new LeftRightTreeTraversal\Node(1);
 		$objNode2 = new LeftRightTreeTraversal\Node(2);
 		
-		$objBuilder->setParentByNodes($objNode1, $objNode2);
+		$this->boolean($objBuilder->setParentByNodes($objNode1, $objNode2))->isTrue();
 		$hashChecks = array(
 			1 => array(
 				'id' 		=> 1,
@@ -479,7 +561,7 @@ class TreeBuilder extends atoum\test {
 			)
 		);
 		
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		$this->array($arrayResult)->size->isEqualTo(2);
 		foreach ($arrayResult as $hashNode) {
 			$this
@@ -501,10 +583,11 @@ class TreeBuilder extends atoum\test {
 		 */
 		
 		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
 		$objNode1 = new LeftRightTreeTraversal\Node(1);
 		$objNode2 = new LeftRightTreeTraversal\Node(2);
 		
-		$objBuilder->setParentByNodes($objNode2, $objNode1);
+		$this->boolean($objBuilder->setParentByNodes($objNode2, $objNode1))->isTrue();
 		$hashChecks = array(
 			1 => array(
 				'id' 		=> 1,
@@ -520,7 +603,7 @@ class TreeBuilder extends atoum\test {
 			)
 		);
 		
-		$arrayResult = $objBuilder->export();
+		$arrayResult = $objBuilder->compute()->export();
 		$this->array($arrayResult)->size->isEqualTo(2);
 		foreach ($arrayResult as $hashNode) {
 			$this
@@ -538,31 +621,377 @@ class TreeBuilder extends atoum\test {
 		}
 	}
 	
+	/**
+	 * Tests on setParentByIds() method
+	 */
 	public function testSetParentByIds() {
 		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$this->boolean($objBuilder->setParentByNodes($objNode1, $objNode2))->isTrue();
+		$hashChecks = array(
+				1 => array(
+						'id' 		=> 1,
+						'parent'	=> null,
+						'left'		=> 0,
+						'right'		=> 3
+				),
+				2 => array(
+						'id' 		=> 2,
+						'parent'	=> 1,
+						'left'		=> 1,
+						'right'		=> 2
+				)
+		);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		$this->array($arrayResult)->size->isEqualTo(2);
+		foreach ($arrayResult as $hashNode) {
+			$this
+			->array($hashNode)
+			->hasKey('id')
+			->hasKey('left')
+			->hasKey('right')
+			->integer($hashNode['id'])
+			->isEqualTo($hashChecks[$hashNode['id']]['id'])
+			->integer($hashNode['left'])
+			->isEqualTo($hashChecks[$hashNode['id']]['left'])
+			->integer($hashNode['right'])
+			->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
+		
+		/*
+		 * Same tests, inverted
+		*/
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$this->boolean($objBuilder->setParentByNodes($objNode2, $objNode1))->isTrue();
+		$hashChecks = array(
+				1 => array(
+						'id' 		=> 1,
+						'parent'	=> 2,
+						'left'		=> 1,
+						'right'		=> 2
+				),
+				2 => array(
+						'id' 		=> 2,
+						'parent'	=> null,
+						'left'		=> 0,
+						'right'		=> 3
+				)
+		);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		$this->array($arrayResult)->size->isEqualTo(2);
+		foreach ($arrayResult as $hashNode) {
+			$this
+			->array($hashNode)
+			->hasKey('id')
+			->hasKey('left')
+			->hasKey('right')
+			->integer($hashNode['id'])
+			->isEqualTo($hashChecks[$hashNode['id']]['id'])
+			->integer($hashNode['left'])
+			->isEqualTo($hashChecks[$hashNode['id']]['left'])
+			->integer($hashNode['right'])
+			->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
 	}
 	
+	/**
+	 * Tests on setChildByNodes method
+	 */
 	public function testSetChildByNodes() {
 		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$this->boolean($objBuilder->setChildByNodes($objNode2, $objNode1))->isTrue();
+		$hashChecks = array(
+				1 => array(
+						'id' 		=> 1,
+						'parent'	=> null,
+						'left'		=> 0,
+						'right'		=> 3
+				),
+				2 => array(
+						'id' 		=> 2,
+						'parent'	=> 1,
+						'left'		=> 1,
+						'right'		=> 2
+				)
+		);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		$this->array($arrayResult)->size->isEqualTo(2);
+		foreach ($arrayResult as $hashNode) {
+			$this
+			->array($hashNode)
+			->hasKey('id')
+			->hasKey('left')
+			->hasKey('right')
+			->integer($hashNode['id'])
+			->isEqualTo($hashChecks[$hashNode['id']]['id'])
+			->integer($hashNode['left'])
+			->isEqualTo($hashChecks[$hashNode['id']]['left'])
+			->integer($hashNode['right'])
+			->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
 	}
 	
+	/**
+	 * Tests on setChildByIds() method
+	 */
 	public function testSetChildByIds() {
 		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		
+		$arrayData = array(
+			array(
+				'id' => 1,
+				'parent'=> null
+			),
+			array(
+				'id' => 2,
+				'parent'=> 1
+			),
+			array(
+				'id' => 3,
+				'parent'=> 1
+			),
+			array(
+				'id' => 4,
+				'parent'=> 2
+			)
+		);
+		$objBuilder->setRawData($arrayData);
+		
+		$this->boolean($objBuilder->setChildById(4, 3))->isTrue();
+		$this->boolean($objBuilder->setChildById(42, 666))->isFalse();
+		
+		$hashChecks = array(
+			1 => array(
+				'id' 		=> 1,
+				'parent'	=> null,
+				'left'		=> 0,
+				'right'		=> 7
+			),
+			2 => array(
+				'id' 		=> 2,
+				'parent'	=> 1,
+				'left'		=> 1,
+				'right'		=> 2
+			),
+			3 => array(
+				'id' 		=> 3,
+				'parent'	=> 1,
+				'left'		=> 3,
+				'right'		=> 6
+			),
+			4 => array(
+				'id' 		=> 4,
+				'parent'	=> 3,
+				'left'		=> 4,
+				'right'		=> 5
+			)
+		);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		$this->array($arrayResult)->size->isEqualTo(4);
+		foreach ($arrayResult as $hashNode) {
+			$this
+			->array($hashNode)
+			->hasKey('id')
+			->hasKey('left')
+			->hasKey('right')
+			->integer($hashNode['id'])
+			->isEqualTo($hashChecks[$hashNode['id']]['id'])
+			->integer($hashNode['left'])
+			->isEqualTo($hashChecks[$hashNode['id']]['left'])
+			->integer($hashNode['right'])
+			->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
+		
+		/* * */
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objBuilder->addNode($objNode2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
+		$objBuilder->addNode($objNode3);
+		$objNode4 = new LeftRightTreeTraversal\Node(4);
+		$objBuilder->addNode($objNode4);
+
+		$objNode2->setParentNode($objNode1);
+		$objNode3->setParentNode($objNode1);
+		$objNode4->setParentNode($objNode2);
+		
+		$this->boolean($objBuilder->setChildById(4, 3))->isTrue();
+		$this->boolean($objBuilder->setChildById(42, 666))->isFalse();
+		
+		$arrayResult = $objBuilder->compute()->export();
+		$this->array($arrayResult)->size->isEqualTo(4);
+		foreach ($arrayResult as $hashNode) {
+			$this
+			->array($hashNode)
+			->hasKey('id')
+			->hasKey('left')
+			->hasKey('right')
+			->integer($hashNode['id'])
+			->isEqualTo($hashChecks[$hashNode['id']]['id'])
+			->integer($hashNode['left'])
+			->isEqualTo($hashChecks[$hashNode['id']]['left'])
+			->integer($hashNode['right'])
+			->isEqualTo($hashChecks[$hashNode['id']]['right'])
+			;
+		}
 	}
 	
 	public function testGetRootNode() {
 		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objBuilder->addNode($objNode2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
+		$objBuilder->addNode($objNode3);
+		$objNode4 = new LeftRightTreeTraversal\Node(4);
+		$objBuilder->addNode($objNode4);
+		
+		$objNode2->setParentNode($objNode1);
+		$objNode3->setParentNode($objNode1);
+		$objNode4->setParentNode($objNode2);
+		
+		$this->object($objBuilder->getRootNode())->isIdenticalTo($objNode1);
+		
+		/* * */
+		
+		// setting a cyclic graph to get an irresolvable graph
+		$objNode1->setParentNode($objNode4);
+		$this->variable($objBuilder->getRootNode())->isNull();
 	}
 	
+	/**
+	 * Tests on getNodeWithLeftAndRightValues() method
+	 */
 	public function testGetNodeWithLeftAndRightValues() {
 		
-	}
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objBuilder->addNode($objNode2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
+		$objBuilder->addNode($objNode3);
+		$objNode4 = new LeftRightTreeTraversal\Node(4);
+		$objBuilder->addNode($objNode4);
+		
+		$objNode2->setParentNode($objNode1);
+		$objNode3->setParentNode($objNode1);
+		$objNode4->setParentNode($objNode2);
 
-	public function testGetNodeWithLeftValue() {
-	
+		// non-existent pair of values, without graph computation
+		$this->variable($objBuilder->getNodeWithLeftAndRightValues(42, 43))->isNull();
+		// existent pair of values, without graph computation
+		$this->variable($objBuilder->getNodeWithLeftAndRightValues(5, 6))->isNull();
+		
+		$objBuilder->compute();
+		
+		// non-existent pair of values, with graph computation
+		$this->variable($objBuilder->getNodeWithLeftAndRightValues(42, 43))->isNull();
+		// existent pair of values, with graph computation
+		$this->object($objBuilder->getNodeWithLeftAndRightValues(5, 6))->isIdenticalTo($objNode3);
 	}
 	
+	/**
+	 * Tests on getNodeWithLeftValue() method
+	 */
+	public function testGetNodeWithLeftValue() {
+		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objBuilder->addNode($objNode2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
+		$objBuilder->addNode($objNode3);
+		$objNode4 = new LeftRightTreeTraversal\Node(4);
+		$objBuilder->addNode($objNode4);
+		
+		$objNode2->setParentNode($objNode1);
+		$objNode3->setParentNode($objNode1);
+		$objNode4->setParentNode($objNode2);
+		
+		// non-existent node left-value, without graph computation
+		$this->variable($objBuilder->getNodeWithLeftValue(42))->isNull();
+		// existent node left-value, without graph computation
+		$this->variable($objBuilder->getNodeWithLeftValue(5))->isNull();
+		
+		$objBuilder->compute();
+		
+		// non-existent node left-value, without graph computation
+		$this->variable($objBuilder->getNodeWithLeftValue(42))->isNull();
+		// existent node left-value, with graph computation
+		$this->object($objBuilder->getNodeWithLeftValue(5))->isIdenticalTo($objNode3);
+		// existent node left-value, with graph computation
+		$this->variable($objBuilder->getNodeWithLeftValue(6))->isNull();
+	}
+	
+	/**
+	 * Tests on getNodeWithRightValue() method
+	 */
 	public function testGetNodeWithRightValue() {
 		
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		
+		$objNode1 = new LeftRightTreeTraversal\Node(1);
+		$objBuilder->addNode($objNode1);
+		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objBuilder->addNode($objNode2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
+		$objBuilder->addNode($objNode3);
+		$objNode4 = new LeftRightTreeTraversal\Node(4);
+		$objBuilder->addNode($objNode4);
+		
+		$objNode2->setParentNode($objNode1);
+		$objNode3->setParentNode($objNode1);
+		$objNode4->setParentNode($objNode2);
+		
+		// non-existent node right-value, without graph computation
+		$this->variable($objBuilder->getNodeWithRightValue(42))->isNull();
+		// existent node right-value, without graph computation
+		$this->variable($objBuilder->getNodeWithRightValue(5))->isNull();
+		
+		$objBuilder->compute();
+
+		// non-existent node right-value, without graph computation
+		$this->variable($objBuilder->getNodeWithRightValue(42))->isNull();
+		// existent node right-value, with graph computation
+		$this->object($objBuilder->getNodeWithRightValue(6))->isIdenticalTo($objNode3);
+		// existent node right-value, with graph computation
+		$this->variable($objBuilder->getNodeWithRightValue(5))->isNull();
 	}
 }
