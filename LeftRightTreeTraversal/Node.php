@@ -4,6 +4,7 @@ namespace LeftRightTreeTraversal;
 
 /**
  * Class Node
+ * 
  * This class define a node which is a vertex in a non-oriented graph.
  * 
  * @author Corentin Legros
