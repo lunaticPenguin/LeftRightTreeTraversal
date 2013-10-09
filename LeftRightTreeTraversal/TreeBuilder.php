@@ -4,6 +4,7 @@ namespace LeftRightTreeTraversal;
 
 /**
  * Class TreeBuilder
+ * 
  * This class define the left-right tree builder
  * which is responsible for building the graph with correct left-right values
  *
@@ -13,7 +14,7 @@ class TreeBuilder {
 
 	/**
 	 * All the nodes composing the internal graph
-	 * @var array array of node
+	 * @var array of node
 	 */
 	protected $arrayNodes;
 
@@ -31,6 +32,18 @@ class TreeBuilder {
      * @see TreeBuilder::__construct()
      */
     protected $hashConfig;
+    
+    /**
+     * Order of the graph
+     * @var integer
+     */
+    protected $intOrder;
+    
+    /**
+     * Flag to know if export has been computed
+     * @var boolean
+     */
+    protected $boolIsComputed;
 
 	/**
 	 * Construct a new tree/graph
@@ -59,25 +72,45 @@ class TreeBuilder {
         
 		$this->arrayNodes = array();
 		$this->boolForcedPostCheckProcess = false;
+		$this->boolIsComputed = false;
+		$this->intOrder = 0;
 	}
 
 	/**
 	 * Add node to graph tree
 	 * @param Node $objNode
+	 * @return boolean
 	 */
 	public function addNode(Node $objNode) {
-		$this->arrayNodes[$objNode->getId()] = $objNode;
+		if (!$this->hasNode($objNode)) {
+			$this->arrayNodes[$objNode->getId()] = $objNode;
+			++$this->intOrder;
+			return true;
+		}
+		return false;
 	}
-
+	
 	/**
 	 * Set the node A parent of node B.
 	 * This method only delegates instructions to the Node class's methods.
 	 *
 	 * @param Node $objNodeA
 	 * @param Node $objNodeB
+	 * 
+	 * @return boolean
 	 */
 	public function setParentByNodes(Node $objNodeA, Node $objNodeB) {
-		$objNodeB->setParentNode($objNodeA);
+		
+		// two checks to verify if the nodes belongs to the builder
+		if (!$this->hasNode($objNodeA)) {
+			$this->addNode($objNodeA);
+		}
+		
+		if (!$this->hasNode($objNodeB)) {
+			$this->addNode($objNodeB);
+		}
+		
+		return $objNodeB->setParentNode($objNodeA);
 	}
 
 	/**
@@ -86,9 +119,21 @@ class TreeBuilder {
 	 *
 	 * @param Node $objNodeA
 	 * @param Node $objNodeB
+	 * 
+	 * @return boolean
 	 */
 	public function setChildByNodes(Node $objNodeA, Node $objNodeB) {
-		$objNodeB->addChild($objNodeA);
+		
+		// two checks to verify if the nodes belongs to the builder
+		if (!$this->hasNode($objNodeA)) {
+			$this->addNode($objNodeA);
+		}
+		
+		if (!$this->hasNode($objNodeB)) {
+			$this->addNode($objNodeB);
+		}
+		
+		return $objNodeB->addChild($objNodeA);
 	}
 
 	/**
@@ -97,13 +142,19 @@ class TreeBuilder {
 	 *
 	 * @param int $intNodeIdA id of node A
 	 * @param int $intNodeIdB id of node B
+	 * 
+	 * @return boolean
 	 */
 	public function setChildById($intNodeIdA, $intNodeIdB) {
-		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
-			$this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
-		} else {
-			$this->boolForcedPostCheckProcess = true;
+		
+		if ($this->hasNodeWithId($intNodeIdA) && $this->hasNodeWithId($intNodeIdB)) {
+			
+			return $this->arrayNodes[$intNodeIdB]->addChild($this->arrayNodes[$intNodeIdA]);
 		}
+		
+		// force checks of relations if settlement is done using self::setRawData() method
+		$this->boolForcedPostCheckProcess = true;
+		return false;
 	}
 
 	/**
@@ -112,41 +163,61 @@ class TreeBuilder {
 	 *
 	 * @param int $intNodeIdA id of node A
 	 * @param int $intNodeIdB id of node B
+	 * 
+	 * @return boolean
 	 */
 	public function setParentById($intNodeIdA, $intNodeIdB) {
-		if (isset($this->arrayNodes[$intNodeIdA]) && isset($this->arrayNodes[$intNodeIdA])) {
-			$this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
-		} else {
-			$this->boolForcedPostCheckProcess = true;
+		
+		if ($this->hasNodeWithId($intNodeIdA) && $this->hasNodeWithId($intNodeIdB)) {
+			return $this->arrayNodes[$intNodeIdB]->setParentNode($this->arrayNodes[$intNodeIdA]);
 		}
+		
+		// force checks of relations if settlemet is done using self::setRawData() method
+		$this->boolForcedPostCheckProcess = true;
+		return false;
 	}
 
 	/**
-	 * Compute the left and right value of for each node which belongs
-	 * to internal graph
-	 *
-	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
+	 * Compute the left and right value for each node which belongs
+	 * to internal graph.
+	 * 
+	 * @return \LeftRightTreeTraversal\TreeBuilder
 	 */
-	public function export() {
+	public function compute() {
 
 		if (empty($this->arrayNodes)) {
-			return array();
+			return $this;
 		}
 
-		$objRootNode = current($this->arrayNodes);
-		while ($objRootNode->getParent() !== null) {
-			$objRootNode = $objRootNode->getParent();
+		$objRootNode = $this->getRootNode();
+		if (is_null($objRootNode)) {
+			return $this;
 		}
 
 		$intCount = 0;
 		$this->_computeRecursivePart($objRootNode, $intCount);
-
+		$this->boolIsComputed = true;
+		return $this;
+	}
+	
+	/**
+	 * Export the whole computed graph as an array of arrays. If the graph hasn't been computed, an empty
+	 * array will be returned.
+	 * 
+	 * @return array FORMAT : array(array('id'=> #INTEGER, 'left' => #INTEGER, 'right' => #INTEGER))
+	 */
+	public function export() {
+		
+		if (!$this->boolIsComputed) {
+			return array();
+		}
+		
 		$arrayResult = array();
 		foreach ($this->arrayNodes as $objNode) {
 			$arrayResult[] = array(
-                $this->hashConfig['key_id']     => $objNode->getId(),
-                $this->hashConfig['key_left']   => $objNode->getLeftValue(),
-                $this->hashConfig['key_right']  => $objNode->getRightValue()
+				$this->hashConfig['key_id']     => $objNode->getId(),
+				$this->hashConfig['key_left']   => $objNode->getLeftValue(),
+				$this->hashConfig['key_right']  => $objNode->getRightValue()
 			);
 		}
 		return $arrayResult;
@@ -194,7 +265,12 @@ class TreeBuilder {
 		foreach ($arrayData as $hashNodeData) {
 			if (!array_key_exists($this->hashConfig['key_id'], $hashNodeData)
                 || !array_key_exists($this->hashConfig['key_parent'], $hashNodeData)) {
-				exit('malformed input raw data');
+				throw new \InvalidArgumentException(
+					sprintf('Malformed input raw data ([%s] and [%s] keys required).',
+						$this->hashConfig['key_id'],
+						$this->hashConfig['key_parent']),
+					100
+				);
 			}
 
 			$boolHasRootNode = !$boolHasRootNode ? is_null($hashNodeData[$this->hashConfig['key_parent']]) : true;
@@ -206,7 +282,7 @@ class TreeBuilder {
 		}
 
 		if (!$boolHasRootNode) {
-			exit('no root node found');
+			throw new \InvalidArgumentException('Root node cannot be found.', 110);
 		}
 
 		if ($boolCheckRelations || $this->boolForcedPostCheckProcess) {
@@ -214,5 +290,116 @@ class TreeBuilder {
 				$this->setParentById($hashNodeData[$this->hashConfig['key_parent']], $hashNodeData[$this->hashConfig['key_id']]);
 			}
 		}
+	}
+	
+	/**
+	 * Allow to found a node by it's left value
+	 * 
+	 * @param integer $intLeftValue
+	 * @return Node|NULL
+	 */
+	public function getNodeWithLeftValue($intLeftValue) {
+		return $this->_getNodeWithValue($intLeftValue, null);
+	}
+	
+	/**
+	 * Allow to found a node by it's right value
+	 *
+	 * @param integer $intRightValue
+	 * @return Node|NULL
+	 */
+	public function getNodeWithRightValue($intRightValue) {
+		return $this->_getNodeWithValue(null, $intRightValue);
+	}
+	
+	/**
+	 * Allow to found a node by it's left and right values
+	 *
+	 * @param integer $intLeftValue
+	 * @param integer $intRightValue
+	 * 
+	 * @return Node|NULL
+	 */
+	public function getNodeWithLeftAndRightValues($intLeftValue, $intRightValue) {
+		return $this->_getNodeWithValue($intLeftValue, $intRightValue);
+	}
+	
+	/**
+	 * Allow to retrieve a specific node with left and/or right value(s)
+	 * 
+	 * @param integer|null $intLeftValue
+	 * @param integer|null $intRightValue
+	 * 
+	 * @return Node|NULL if not found
+	 */
+	protected function _getNodeWithValue($intLeftValue, $intRightValue) {
+		
+		if ($intLeftValue !== null && $intRightValue === null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getLeftValue() === $intLeftValue) {
+					return $objNode;
+				}
+			}
+		} else if ($intLeftValue === null && $intRightValue !== null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getRightValue() === $intRightValue) {
+					return $objNode;
+				}
+			}
+		} else if ($intLeftValue !== null && $intRightValue !== null) {
+			foreach ($this->arrayNodes as $objNode) {
+				if ($objNode->getLeftValue() === $intLeftValue && $objNode->getRightValue() === $intRightValue) {
+					return $objNode;
+				}
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Allow to retrieve the root node
+	 * 
+	 * @return Node|NULL
+	 */
+	public function getRootNode() {
+		foreach ($this->arrayNodes as $objNode) {
+			if ($objNode->getParent() === null) {
+				return $objNode;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Allow to know if the builder already has a node
+	 * @param Node $objNode
+	 */
+	public function hasNode(Node $objNode) {
+		return $this->hasNodeWithId($objNode->getId());
+	}
+	
+	/**
+	 * Allow to know if the builder already has a node with a specific id
+	 * @param integer $intNodeId
+	 */
+	public function hasNodeWithId($intNodeId) {
+		return array_key_exists($intNodeId, $this->arrayNodes);
+	}
+	
+	/**
+	 * Allow to get the graph's order
+	 * @return integer
+	 */
+	public function getOrder() {
+		return $this->intOrder;
+	}
+	
+	/**
+	 * Allow to know if the process has been computed
+	 * @return boolean
+	 */
+	public function isComputed() {
+		return $this->boolIsComputed;
 	}
 }
