@@ -200,15 +200,31 @@ class Node extends atoum\test {
 	public function testSetParentNode() {
 		$objNode1 = new LeftRightTreeTraversal\Node(1);
 		$objNode2 = new LeftRightTreeTraversal\Node(2);
+		$objNode3 = new LeftRightTreeTraversal\Node(3);
 		
 		$this->variable($objNode1->getParent())->isNull();
 		$this->boolean($objNode2->hasChildren())->isFalse();
-
+		
+		// set n2 as parent of n1
 		$this->boolean($objNode1->setParentNode($objNode2))->isTrue();
+		
+		// set n1 as parent of n1 -> wrong
 		$this->boolean($objNode1->setParentNode($objNode1))->isFalse(); // cannot set it's parent to itself
 		
 		$this->object($objNode1->getParent())->isInstanceOf('LeftRightTreeTraversal\Node');
 		$this->boolean($objNode2->hasChildren())->isTrue();
+		
+		// set n3 as parent of n1
+		$this->boolean($objNode1->setParentNode($objNode3))->isTrue();
+		// so n2 has no more child (only one parent per child)
+		$this->boolean($objNode2->hasChildren())->isFalse();
+		$this->object($objNode1->getParent())->isInstanceOf('LeftRightTreeTraversal\Node');
+		
+		// set n2 as parent of n3 (1-3-2)
+		$this->boolean($objNode3->setParentNode($objNode2))->isTrue();
+		$this->boolean($objNode2->hasChildren())->isTrue();
+		$this->boolean($objNode2->hasChild($objNode3))->isTrue();
+		
 	}
 	
 	/**
