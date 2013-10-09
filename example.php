@@ -53,6 +53,8 @@ $arrayList = array(
 
 $objBuilder = new TreeBuilder();
 $objBuilder->setRawData($arrayList);
+$objBuilder->compute();
+
 var_dump($objBuilder->export());
 
 // attempt to retrieve the node with the left value set to 5
