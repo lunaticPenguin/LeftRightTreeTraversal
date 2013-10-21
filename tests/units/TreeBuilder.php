@@ -43,6 +43,65 @@ class TreeBuilder extends atoum\test {
 	}
 	
 	/**
+	 * Tests on setconfiguration() method
+	 */
+	public function testSetconfiguration() {
+		
+		$hashConfig = array(
+			'key_left' 		=>	'custom_left',
+			'key_right'		=>	'custom_right',
+			'key_id'		=>	'custom_id',
+			'key_parent'	=>	'custom_parent'
+		);
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder();
+		$objBuilder->setConfiguration($hashConfig);
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(1));
+		$objBuilder->setChildById(1, 0);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		
+		$this->array($arrayResult)
+			->size->isEqualTo(2);
+		
+		foreach ($arrayResult as $hash) {
+			$this->array($hash)
+				->hasKey('custom_id')
+				->hasKey('custom_left')
+				->hasKey('custom_right');
+		}
+		
+		/*
+		 * Same test, using __construct() to set the configuration
+		 */
+		
+		$hashConfig = array(
+				'key_left' 		=>	'custom_left',
+				'key_right'		=>	'custom_right',
+				'key_id'		=>	'custom_id',
+				'key_parent'	=>	'custom_parent'
+		);
+		$objBuilder = new LeftRightTreeTraversal\TreeBuilder($hashConfig);
+		
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(0));
+		$objBuilder->addNode(new LeftRightTreeTraversal\Node(1));
+		$objBuilder->setChildById(1, 0);
+		
+		$arrayResult = $objBuilder->compute()->export();
+		
+		$this->array($arrayResult)
+		->size->isEqualTo(2);
+		
+		foreach ($arrayResult as $hash) {
+			$this->array($hash)
+			->hasKey('custom_id')
+			->hasKey('custom_left')
+			->hasKey('custom_right');
+		}
+	}
+	
+	/**
 	 * Tests on hasNode() method
 	 */
 	public function testHasNode() {
