@@ -50,30 +50,41 @@ class TreeBuilder {
 	 */
 	public function __construct(array $hashConfig = array()) {
 
-        $hashConfigDefaultValues = array(
-            'key_left'      => 'left',
-            'key_right'     => 'right',
-            'key_id'        => 'id',
-            'key_parent'    => 'parent'
-        );
-
-        $this->hashConfig = array_merge($hashConfigDefaultValues, $hashConfig);
-        $arrayAvailableConfig = array_keys($hashConfigDefaultValues);
-        foreach ($arrayAvailableConfig as $strKey1Name) {
-            foreach ($arrayAvailableConfig as $strKey2Name) {
-                if ($strKey1Name !== $strKey2Name) {
-                    if ($this->hashConfig[$strKey1Name] === $this->hashConfig[$strKey2Name]) {
-                        $this->hashConfig[$strKey1Name] = $hashConfigDefaultValues[$strKey1Name];
-                        $this->hashConfig[$strKey2Name] = $hashConfigDefaultValues[$strKey2Name];
-                    }
-                }
-            }
-        }
+        $this->setConfiguration($hashConfig);
         
 		$this->arrayNodes = array();
 		$this->boolForcedPostCheckProcess = false;
 		$this->boolIsComputed = false;
 		$this->intOrder = 0;
+	}
+	
+	/**
+	 * Configure the builder
+	 * @param array $hashConfig
+	 * @return \LeftRightTreeTraversal\TreeBuilder
+	 */
+	public function setConfiguration(array $hashConfig) {
+		
+		$hashConfigDefaultValues = array(
+			'key_left'      => 'left',
+			'key_right'     => 'right',
+			'key_id'        => 'id',
+			'key_parent'    => 'parent'
+		);
+		
+		$this->hashConfig = array_merge($hashConfigDefaultValues, $hashConfig);
+		$arrayAvailableConfig = array_keys($hashConfigDefaultValues);
+		foreach ($arrayAvailableConfig as $strKey1Name) {
+			foreach ($arrayAvailableConfig as $strKey2Name) {
+				if ($strKey1Name !== $strKey2Name) {
+					if ($this->hashConfig[$strKey1Name] === $this->hashConfig[$strKey2Name]) {
+						$this->hashConfig[$strKey1Name] = $hashConfigDefaultValues[$strKey1Name];
+						$this->hashConfig[$strKey2Name] = $hashConfigDefaultValues[$strKey2Name];
+					}
+				}
+			}
+		}
+		return $this;
 	}
 
 	/**
