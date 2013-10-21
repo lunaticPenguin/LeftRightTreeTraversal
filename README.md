@@ -1,4 +1,4 @@
-# LeftRightTreeTraversal version 0.2
+# LeftRightTreeTraversal version 0.2.1
 
 ## Introduction
 
