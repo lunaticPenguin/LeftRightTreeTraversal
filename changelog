@@ -1,0 +1,2 @@
+From version v0.2.1 to v0.2.2
+ * Added parent node's id to the TreeBuilder::export()s return
