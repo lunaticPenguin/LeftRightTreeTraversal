@@ -4,9 +4,9 @@ namespace LeftRightTreeTraversal;
 
 /**
  * Class Node
- * 
+ *
  * This class define a node which is a vertex in a non-oriented graph.
- * 
+ *
  * @author Corentin Legros
  */
 class Node {
@@ -52,11 +52,11 @@ class Node {
 	 * @param $intId
 	 */
 	public function __construct($intId) {
-		$this->intId = $intId;
-		
+		$this->intId = (int) $intId;
+
 		$this->intLeftValue = 0;
 		$this->intRightValue = 0;
-		
+
 		$this->objParent = null;
 		$this->arrayChildrenNodes = array();
 	}
@@ -69,7 +69,7 @@ class Node {
 	 * @return boolean
 	 */
 	public function addChild(Node $objChildNode) {
-		
+
 		if (!$this->hasChild($objChildNode) && $this !== $objChildNode) {
 			$this->arrayChildrenNodes[$objChildNode->getId()] = $objChildNode;
 			if ($objChildNode->getParent() !== $this) {
@@ -89,7 +89,7 @@ class Node {
 	public function removeChild(Node $objChildToRemove) {
 		return $this->removeChildWithId($objChildToRemove->getId());
 	}
-	
+
 	/**
 	 * Attempt to remove a child with given id from the current node.
 	 * @param integer $intNodeId
@@ -111,16 +111,16 @@ class Node {
 	 * @return boolean
 	 */
 	public function setParentNode(Node $objParent) {
-		
+
 		if ($this === $objParent || $this->objParent === $objParent) {
 			return false;
 		}
-		
+
 		if ($this->objParent !== null) {
 			$this->objParent->removeChild($this);
 			$this->objParent = null;
 		}
-		
+
 		$objParent->addChild($this);
 		$this->objParent = $objParent;
 		return true;
@@ -172,7 +172,7 @@ class Node {
 
 	/**
 	 * Return the parent node
-	 * @return \Node
+	 * @return \Node|null
 	 */
 	public function getParent() {
 		return $this->objParent;
@@ -193,7 +193,7 @@ class Node {
 	public function getChildren() {
 		return $this->arrayChildrenNodes;
 	}
-	
+
 	/**
 	 * Allow to know if the current node has parent
 	 * @return boolean
@@ -201,7 +201,7 @@ class Node {
 	public function hasParent() {
 		return $this->objParent !== null;
 	}
-	
+
 	/**
 	 * Allow to know if the current node has children
 	 * @return boolean
@@ -218,7 +218,7 @@ class Node {
 	public function hasChild(Node $objNode) {
 		return $this->hasChildWithId($objNode->getId());
 	}
-	
+
 	/**
 	 * Allow to know if a node with given id is a child of the current node
 	 * @param integer $intNodeId
